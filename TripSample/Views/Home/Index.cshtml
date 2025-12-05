@@ -1,0 +1,189 @@
+﻿@{
+	ViewData["Title"] = "Trip Sample - Index";
+}
+
+@model List<TripSample.Domain.Model.BusLocationModel>
+@inject IHttpContextAccessor Accessor
+
+<form asp-controller="Home" asp-action="JourneyIndex" method="get">
+	<div class="text-center">
+		<div class="main-trip-area">
+			<div class="header"></div>
+			<div class="container" style="position:relative">
+				<div class="row justify-content-center" style="margin-top:20px;">
+					<div class="col-sm">
+						<div class="search-container">
+							<span>Nereden</span>
+							<i class="material-icons custom-icon">location_on</i>
+
+							<select class="form-control search-input" id="inpOrigin" name="OriginId">
+							</select>
+							<input type="hidden" name="OriginName" id="inpOriginName" />
+						</div>
+					</div>
+				</div>
+				<div class="row justify-content-center" style="position: absolute; right: 30px;">
+					<button class="circle-arrow-btn" type="button" onclick="swapLocations();">
+						<span class="arrow up">↑↓</span>
+					</button>
+				</div>
+
+
+				<div class="row justify-content-center" style="margin-top:20px;">
+					<div class="col-sm">
+						<div class="search-container">
+							<span>Nereye</span>
+							<i class="material-icons custom-icon">location_on</i>
+							<select class="form-control search-input" id="inpTarget" name="TargetId">
+							</select>
+							<input type="hidden" name="TargetName" id="inpTargetName" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row justify-content-center" style="margin-top:20px;">
+					<div class="col-sm">
+						<div class="search-container">
+							<span>Tarih</span>
+							<i class="material-icons custom-icon">calendar_month</i>
+							<div class="">
+								<div class="col-md-8">
+									<input type="text" id="inpDate" name="DepartureDate" class="form-control search-input" data-mdb-disable-past="true" placeholder="Tarih">
+
+								</div>
+								<div class="col-md-2">
+									<button type="button" class="btn btn-secondary  btn-today" id="btnToday">
+										Bugün
+									</button>
+
+								</div>
+								<button type="button" class="btn btn-outline-dark btn-tomorrow" id="btnTomorrow">
+									Yarın
+								</button>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="row justify-content-center" style="margin-top:20px;">
+					<div class="col-sm">
+						<div class="search-container">
+							<button type="submit" id="btnSearch" class="btn btn-primary btn-search">
+								Bileti Bul
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</form>
+
+<script type="text/javascript">
+
+		$(document).ready(function() {
+
+
+			GetInpTarget();
+			GetinpOrigin();
+
+			// GetInpOriginOnReady();
+			// GetInpTargetOnReady();
+
+			$('#btnToday').on('click',function(){
+				$('#inpDate').val(GetTodayDateWithFormat());
+			});
+
+			$('#btnTomorrow').on('click',function(){
+				$('#inpDate').val(GetTomorrowDateWithFormat());
+			});
+
+			$('#inpDate').val(GetTomorrowDateWithFormat());
+
+			$('#inpDate').on('change',function(){
+
+				if(isPastDate($('#inpDate').val()))
+				{
+					$('#inpDate').val(GetTodayDateWithFormat());
+				}
+			})
+
+			$('#inpOrigin').on('select2:select', function (e) {
+				$("#inpOriginName").val(e.params.data.text);
+			});
+			$('#inpTarget').on('select2:select', function (e) {
+				$("#inpTargetName").val(e.params.data.text);
+			});
+
+			if(getCookie('indexOriginVal'))
+			{
+				$('#inpOrigin').append(new Option(htmlDecode(getCookie('indexOriginName')), getCookie('indexOriginVal'), false, false));
+				$('#inpOriginName').val($('#inpOrigin').select2('data')[0].text);
+				$('#inpTarget').append(new Option(htmlDecode(getCookie('indexTargetName')), getCookie('indexTargetVal'), false, false));
+				$('#inpTargetName').val($('#inpTarget').select2('data')[0].text);
+				$('#inpDate').val(FormatDate(getCookie('indexDepartureVal')));
+			}
+
+		});
+
+		window.addEventListener("pageshow", function (event) {
+
+			if (event.persisted) {
+				location.reload();
+				return;
+			}
+
+			let navType = performance.getEntriesByType("navigation")[0].type;
+
+			if (navType === "back_forward") {
+				location.reload();
+				return;
+			}
+		});
+
+
+		$(function() {
+			$("#inpDate").datepicker({
+				minDate: 0,
+				monthNames: [
+					"Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+					"Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+				],
+				dayNamesMin: ["Pz", "Pt", "Sa", "Ça", "Pe", "Cu", "Ct"],
+				dateFormat: "dd.mm.yy"
+			});
+		});
+
+
+		function GetInpTarget() {
+		$('#inpTarget').select2({
+			placeholder: 'Nereye',
+			ajax: {
+				url: '/Home/GetBusLocations',
+				dataType: 'json',
+				delay: 250,
+				data: function (params) {
+					return {
+						q: params.term
+					};
+				},
+				processResults: function (data) {
+					data.splice(data.map(e => e.id).indexOf(parseInt($('#inpOrigin').val())), 1);
+					return {
+						results: data.map(function (item) {
+							return {
+								id: item.id,
+								text: item.name
+							};
+						})
+					};
+				},
+				cache: true
+			}
+		});
+	};
+
+</script>
