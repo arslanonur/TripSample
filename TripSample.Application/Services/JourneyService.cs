@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using TripSample.Application.Interfaces;
+using TripSample.Domain.Const;
 using TripSample.Domain.DTO;
 using TripSample.Infrastructure;
 using TripSample.Infrastructure.Client;
@@ -8,7 +9,7 @@ namespace TripSample.Application.Services
 {
     public class JourneyService : IJourneyService
     {
-        private const string _busJourneysCacheKey = "bus_journeys_";
+       
         private readonly IObiletApiClient _obiletApiClient;
         private readonly IMemoryCache _memoryCache; //todo: onur => daha sonra redis e geçilebilir
 
@@ -19,30 +20,35 @@ namespace TripSample.Application.Services
         }
         public async Task<BusJourneysResponseModel> GetBusJourneyAsync(BusJourneysRequestModel busJourneysRequestModel)
         {
-            busJourneysRequestModel.Language = "tr-TR";
+            busJourneysRequestModel.Language = Const.DefaultLanguage;
             busJourneysRequestModel.Date = DateTime.Now;
 
-            if (_memoryCache.TryGetValue(_busJourneysCacheKey + busJourneysRequestModel.Data.TargetId + "_" + busJourneysRequestModel.Data.OriginId + "_" + busJourneysRequestModel.Data.DepartureDate, out BusJourneysResponseModel busJourneysFromCache))
+            var busJourneysFromCache = GetJourneysFromCache(busJourneysRequestModel.Data.TargetId, busJourneysRequestModel.Data.OriginId, busJourneysRequestModel.Data.DepartureDate);
+            if (busJourneysFromCache != null)
             {
                 return busJourneysFromCache;
             }
 
-
             var getResponse = await _obiletApiClient.PostAsync<BusJourneysRequestModel, BusJourneysResponseModel>(Endpoints.GetJourneys, busJourneysRequestModel);
-            if (getResponse.Status != "Success")
+            if (getResponse.Status != Const.SuccessStatus)
             {
-                throw new Exception("Seferler getirilemedi!");
+                throw new Exception(Const.JourneysCannotCreated);
             }
             else if (getResponse.Data != null)
             {
-                _memoryCache.Set(_busJourneysCacheKey + busJourneysRequestModel.Data.TargetId + "_" + busJourneysRequestModel.Data.OriginId + "_" + busJourneysRequestModel.Data.DepartureDate, getResponse, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60) });
+                _memoryCache.Set(Const.BusJourneysCacheKey + busJourneysRequestModel.Data.TargetId + "_" + busJourneysRequestModel.Data.OriginId + "_" + busJourneysRequestModel.Data.DepartureDate, getResponse, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60) });
 
                 return getResponse;
-
             }
 
             return null;
+        }
 
+        private BusJourneysResponseModel GetJourneysFromCache(int targetId, int originId, string departureDate)
+        {
+            var cacheKey = Const.BusJourneysCacheKey + targetId + "_" + originId + "_" + departureDate;
+            _memoryCache.TryGetValue(cacheKey, out BusJourneysResponseModel busJourneysFromCache);
+            return busJourneysFromCache;
         }
     }
 }

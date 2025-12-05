@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TripSample.Application.Interfaces;
+using TripSample.Domain.Const;
 using TripSample.Domain.DTO;
 using TripSample.Domain.Model;
 
@@ -62,6 +63,7 @@ namespace TripSample.WebUI.Controllers.Home
             return null;
         }
 
+        [NullCheck]
         public async Task<IActionResult> JourneyIndex(BusJourneyDataModel dataModel)
         {
             var sessionInfo = await GetSession();
@@ -80,11 +82,11 @@ namespace TripSample.WebUI.Controllers.Home
                     }
                 };
 
-                Response.Cookies.Append("indexOriginVal", dataModel.OriginId.ToString());
-                Response.Cookies.Append("indexOriginName", dataModel.OriginName?.ToString());
-                Response.Cookies.Append("indexTargetVal", dataModel.TargetId.ToString());
-                Response.Cookies.Append("indexTargetName", dataModel.TargetName?.ToString());
-                Response.Cookies.Append("indexDepartureVal", dataModel.DepartureDate);
+                Response.Cookies.Append(Const.IndexOriginVal, dataModel.OriginId.ToString());
+                Response.Cookies.Append(Const.IndexOriginName, dataModel.OriginName?.ToString());
+                Response.Cookies.Append(Const.IndexTargetVal, dataModel.TargetId.ToString());
+                Response.Cookies.Append(Const.IndexTargetName, dataModel.TargetName?.ToString());
+                Response.Cookies.Append(Const.IndexDepartureVal, dataModel.DepartureDate);
 
                 var journeyData = await _journeyService.GetBusJourneyAsync(busJourneyRequestModel);
                 
@@ -97,7 +99,7 @@ namespace TripSample.WebUI.Controllers.Home
 
         private void AddCookieForSessionInfo(SessionModel sessionModel)
         {
-            Response.Cookies.Append("tripSessionId", sessionModel.SessionId, new CookieOptions
+            Response.Cookies.Append(Const.TripSessionId, sessionModel.SessionId, new CookieOptions
             {
                 Expires = DateTimeOffset.Now.AddMinutes(5),
                 HttpOnly = true,
@@ -105,7 +107,7 @@ namespace TripSample.WebUI.Controllers.Home
                 SameSite = SameSiteMode.Strict
             });
 
-            Response.Cookies.Append("tripDeviceId", sessionModel.DeviceId, new CookieOptions
+            Response.Cookies.Append(Const.TripDeviceId, sessionModel.DeviceId, new CookieOptions
             {
                 Expires = DateTimeOffset.Now.AddMinutes(5),
                 HttpOnly = true,
@@ -117,8 +119,8 @@ namespace TripSample.WebUI.Controllers.Home
 
         private SessionModel GetSessionInfoFromCookie()
         {
-            Request.Cookies.TryGetValue("tripSessionId", out var tripSessionId);
-            Request.Cookies.TryGetValue("tripDeviceId", out var tripDeviceId);
+            Request.Cookies.TryGetValue(Const.TripSessionId, out var tripSessionId);
+            Request.Cookies.TryGetValue(Const.TripDeviceId, out var tripDeviceId);
 
             if (!string.IsNullOrEmpty(tripSessionId) && !string.IsNullOrEmpty(tripDeviceId))
             {

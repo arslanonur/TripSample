@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using TripSample.Application.Interfaces;
+using TripSample.Domain.Const;
 using TripSample.Domain.DTO;
 using TripSample.Domain.Model;
 using TripSample.Infrastructure;
@@ -16,7 +12,6 @@ namespace TripSample.Application.Services
     {
         private readonly IObiletApiClient _obiletApiClient;
         private readonly IMemoryCache _memoryCache; //todo: onur => daha sonra redis e geçilebilir
-        private const string _busLocationsCacheKey = "bus_locations_all";
 
         public BusLocationService(IObiletApiClient obiletApiClient, IMemoryCache memoryCache)
         {
@@ -30,11 +25,11 @@ namespace TripSample.Application.Services
                 Data = data,
                 SessionData = sessionInfo,
                 Date = DateTime.Now,
-                Language = "tr-TR"
+                Language = Const.DefaultLanguage,
             };
 
 
-            if (_memoryCache.TryGetValue(_busLocationsCacheKey + "_" + data, out List<BusLocationModel> busLocationsAllFromCache))
+            if (_memoryCache.TryGetValue(Const.BusLocationsCacheKey + "_" + data, out List<BusLocationModel> busLocationsAllFromCache))
             {
                 return busLocationsAllFromCache;
             }
@@ -46,9 +41,9 @@ namespace TripSample.Application.Services
                 return null;
             }
 
-            if (getResponse.Status != "Success")
+            if (getResponse.Status != Const.SuccessStatus)
             {
-                throw new Exception("Konumlar getirilemedi!");
+                throw new Exception(Const.LocationsCannotCreated);
             }
             else if (getResponse.Data != null)
             {
@@ -67,7 +62,7 @@ namespace TripSample.Application.Services
                     });
                 }
 
-                _memoryCache.Set(_busLocationsCacheKey + "_" + data, busLocationListModel, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60) });
+                _memoryCache.Set(Const.BusLocationsCacheKey + "_" + data, busLocationListModel, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60) });
 
                 return busLocationListModel;
             }

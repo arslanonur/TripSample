@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using TripSample.Application.Interfaces;
+﻿using TripSample.Application.Interfaces;
+using TripSample.Domain.Const;
 using TripSample.Domain.DTO;
 using TripSample.Domain.Model;
 using TripSample.Infrastructure;
@@ -27,9 +27,9 @@ namespace TripSample.Application.Services
 
             var getResponse = await _obiletApiClient.PostAsync<GetSessionRequest, GetSessionResponse>(Endpoints.GetSession, getSessionRequest);
 
-            if (getResponse.Status != "Success")
+            if (getResponse.Status != Const.SuccessStatus)
             {
-                throw new Exception("Session Oluşturulamadı");
+                throw new Exception(Const.SessionCannotCreated);
             }
             else if (getResponse.Data != null)
             {
