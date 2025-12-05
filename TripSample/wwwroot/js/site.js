@@ -5,7 +5,7 @@
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
 
-    const formattedDate = day + '.' + month + '.' + year
+    const formattedDate = year + '-' + month + '-' + day
 
     return formattedDate;
 
@@ -21,7 +21,7 @@ function GetTomorrowDateWithFormat() {
     const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const year = tomorrow.getFullYear();
 
-    const formattedTomorrow = day + '.' + month + '.' + year
+    const formattedTomorrow = year + '-' +month +'-'+ day
 
     return formattedTomorrow;
 }
@@ -32,12 +32,12 @@ function FormatDate(dateStr) {
     const month = String(datim.getMonth() + 1).padStart(2, '0');
     const year = datim.getFullYear();
 
-    const formattedDate = day + '.' + month + '.' + year
+    const formattedDate = year + '-' + month + '-' + day
 
     return formattedDate;
 }
 function isPastDate(inputDateStr) {
-    const parts = inputDateStr.split('.');
+    const parts = inputDateStr.split('-');
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1;
     const year = parseInt(parts[2], 10);
@@ -173,7 +173,7 @@ function getCookie(name) {
 }
 
 function FormatTurkishDate(dateStr) {
-    const [day, month, year] = dateStr.split('.').map(Number);
+    const [day, month, year] = dateStr.split('-').map(Number);
 
     const date = new Date(year, month - 1, day);
     const months = [
