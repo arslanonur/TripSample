@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace TripSample.Domain.DTO
 {
@@ -14,20 +14,23 @@ namespace TripSample.Domain.DTO
         private string _departureDate;
 
         [JsonPropertyName("departure-date")]
-        public string DepartureDate {
+        public string DepartureDate
+        {
             get => _departureDate;
             set
             {
-                if (DateTime.TryParse(value, out var dt))
+                var culture = new CultureInfo(Const.Const.DefaultLanguage);
+
+                if (DateTime.TryParseExact(value, "dd.MM.yyyy", culture,
+                                           DateTimeStyles.None, out var dt))
                 {
-                    _departureDate = dt.ToString("yyyy-MM-dd");
+                    _departureDate = dt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 }
                 else
                 {
                     _departureDate = value;
                 }
             }
-
         }
 
         public string OriginName { get; set; }
