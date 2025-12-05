@@ -41,6 +41,11 @@ namespace TripSample.Application.Services
 
             var getResponse = await _obiletApiClient.PostAsync<BusLocationsRequestModel, BusLocationResponseModel>(Endpoints.GetBusLocations, busLocationReqeust);
 
+            if (getResponse == null)
+            {
+                return null;
+            }
+
             if (getResponse.Status != "Success")
             {
                 throw new Exception("Konumlar getirilemedi!");
