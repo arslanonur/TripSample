@@ -90,6 +90,7 @@ Kullanıcı geri geldiğinde formdaki bilgilerin korunması için.
 - Bugün / Yarın butonları
 - Geçmiş tarihler engelleniyor
 - Nereden ↕ Nereye swap butonu: Seçilen iki input’un birbirinin yerine geçmesi
+- Eğer kalan koltuk sayısı <= 10 ise sefer alanında kırmızı kutuda gösterilir.
 
 <img width="481" height="647" alt="image" src="https://github.com/user-attachments/assets/1989159d-e7d1-484a-b74d-433e09a427e9" />
 <img width="432" height="1005" alt="image" src="https://github.com/user-attachments/assets/749997bc-57a8-4197-86be-7dc5e3377f1c" />
