@@ -36,6 +36,8 @@ namespace TripSample.Application.Services
             }
             else if (getResponse.Data != null)
             {
+                getResponse.Data = getResponse.Data.OrderBy(x => x.Journey.Departure).ToList();
+
                 _memoryCache.Set(Const.BusJourneysCacheKey + busJourneysRequestModel.Data.TargetId + "_" + busJourneysRequestModel.Data.OriginId + "_" + busJourneysRequestModel.Data.DepartureDate, getResponse, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60) });
 
                 return getResponse;
